@@ -18,8 +18,15 @@ var fs = require("fs");
 //console.log(artist);
 
 var bandsInTown = function (artist) {
+    
     axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp").then(
         function (response) {
+            //console.log(response);
+            if(response.data.length === 0){
+                console.log ("Looks like the selected artist: " + artist + ", has no planned tour dates. Choose another artist for your search!");
+            }
+            
+            else {
                 console.log(
             "============================================================================"
                 );
@@ -35,6 +42,7 @@ var bandsInTown = function (artist) {
                         );
 
             }
+        }
         })
         .catch(function (error) {
             if (error.response) {
@@ -70,15 +78,20 @@ var spotifyer = function (artist) {
                    
 
                     fs.appendFile("log.txt", "\n"+"_________________________________________________________________________________________________________"
-                     + "\n"+"Spotify Search Results for: " +artist +"\n" + "Album: "+ albumName +"\n"
-                        + "SONG TITLE: " + songName +"\n"  + " ARTIST: " + artistName +"\n" + " PREVIEW URL: " + previewUrl, function (err) {
+                     + "\n"+"Spotify Search Results for: " +artist 
+                     +"\n" + "Album: "+ albumName 
+                     +"\n" + "SONG TITLE: " + songName 
+                     +"\n"  + " ARTIST: " + artistName 
+                     +"\n" + " PREVIEW URL: " + previewUrl, 
+                     
+                     function (err) {
                             if (err) {
                                 console.log(err);
                             }
                             else {
                                 //console.log("content added!")
                             }
-                        });
+                    });
                 }
 
             }
@@ -113,18 +126,24 @@ var getMovie = function (artist) {
             var mPlot = response.data.Plot;
             var mActors = response.data.Actors;
 
-            fs.appendFile("log.txt", "\n"+"_________________________________________________________________________________________________________" + 
-                        "\n"+"OMDB Search Results for: " +artist +"\n" 
-                        + "Movie Title: " + mTitle +"\n"+ "Year Released: " + mYear+"\n"+"IMDB Rating: "+ mImdbRating
-                        +"\n"+"Rotten Tomatoes Score: "+ mRottenToms +"\n" +"Production Location: " + mProdCountry +"\n"
-                        + "Language(s): " + mLanguage + "\n" + "Plot: " + mPlot + "\n" + "Cast: " + mActors, function (err) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            else {
-                                console.log("content added!")
-                            }
-                        });
+            fs.appendFile("log.txt", "\n"+"_________________________________________________________________________________________________________" 
+            + "\n"+"OMDB Search Results for: " +artist 
+            +"\n" + "Movie Title: " + mTitle 
+            +"\n"+ "Year Released: " + mYear
+            +"\n"+"IMDB Rating: "+ mImdbRating
+            +"\n"+"Rotten Tomatoes Score: "+ mRottenToms 
+            +"\n" +"Production Location: " + mProdCountry 
+            +"\n"+ "Language(s): " + mLanguage 
+            + "\n" + "Plot: " + mPlot 
+            + "\n" + "Cast: " + mActors, 
+                function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    else {
+                        console.log("content added!")
+                    }
+                });
         }).catch(function (error) {
             if (error.response) {
                 console.log("--------------DATA----------------");
