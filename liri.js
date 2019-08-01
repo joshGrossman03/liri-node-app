@@ -1,26 +1,38 @@
+
+
 require("dotenv").config();
+var Spotify = require('node-spotify-api');
 var keys = require("./keys.js");
-//var spotify = new Spotify(keys.spotify);
+var spotify = new Spotify(keys.spotify);
 var axios = require("axios");
 var moment = require('moment');
-//nodevar spotify = require('node-spotify-api');
 var command = process.argv[2];
 var artist = process.argv[3];
- console.log(command);
- console.log(artist);
+var fs = require("fs");
+
+ 
+
+
+
+//console.log(command);
+//console.log(artist);
 
 var bandsInTown = function (artist) {
     axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp").then(
         function (response) {
-
+                console.log(
+            "============================================================================"
+                );
+                console.log("Tour Date(s) search results for: " + artist);
             for (var i = 0; i < response.data.length; i++) {
-                console.log("--------Tour Date Info-------------")
-                console.log(response.data[i].venue.name);
-                console.log(response.data[i].venue.city);
-                console.log(response.data[i].venue.country);
-
+                
+                console.log("Venue: "+ response.data[i].venue.name);
+                console.log("Location: " + response.data[i].venue.city +", "+ response.data[i].venue.country);
                 var eventTime = response.data[i].datetime;
-                console.log(eventTime);
+                console.log("Time: "+ eventTime);
+                console.log(
+                    "---------------------"
+                        );
 
             }
         })
@@ -31,17 +43,156 @@ var bandsInTown = function (artist) {
             }
         })
 };
-    
+
+var spotifyer = function (artist) {
+
+    if (!artist) {
+        artist = 'The Sign by Ace of Base'
+    }
+
+    spotify.search({ type: 'track', query: artist, limit: 20 })
+        .then(function (response) {
+
+            if (response) {
+
+                for (var j = 0; j < response.tracks.items.length; j++) {
+
+                    var albumName = response.tracks.items[j].album.name;
+                    var artistName = response.tracks.items[j].artists[0].name;
+                    var songName = response.tracks.items[j].name;
+                    var previewUrl = response.tracks.items[j].preview_url;
+
+                    console.log("-----------Song---------------");
+                    console.log("Album: "+ albumName);
+                    console.log("Artist: "+ artistName);
+                    console.log("Song Title: "+ songName);
+                    console.log("Preview the song here: "+ previewUrl);
+                   
+
+                    fs.appendFile("log.txt", "\n"+"_________________________________________________________________________________________________________"
+                     + "\n"+"Spotify Search Results for: " +artist +"\n" + "Album: "+ albumName +"\n"
+                        + "SONG TITLE: " + songName +"\n"  + " ARTIST: " + artistName +"\n" + " PREVIEW URL: " + previewUrl, function (err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            else {
+                                //console.log("content added!")
+                            }
+                        });
+                }
+
+            }
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
+};
+
+
+var getMovie = function (artist) {
+    if (!artist) {
+        artist = 'Mr. Nobody.'
+    };
+    axios.get("https://www.omdbapi.com/?apikey=trilogy&t=" + artist).then(
+        function (response) {
+            //console.log(response);
+            console.log(response.data.Title);
+            console.log(response.data.Year);
+            console.log(response.data.imdbRating);
+            console.log(response.data.Ratings[1].Value);
+            console.log(response.data.Country);
+            console.log(response.data.Language);
+            console.log(response.data.Plot);
+            console.log(response.data.Actors);
+            var mTitle = response.data.Title;
+            var mYear = response.data.Year;
+            var mImdbRating = response.data.imdbRating;
+            var mRottenToms= response.data.Ratings[1].Value;
+            var mProdCountry = response.data.Country;
+            var mLanguage = response.data.Language;
+            var mPlot = response.data.Plot;
+            var mActors = response.data.Actors;
+
+            fs.appendFile("log.txt", "\n"+"_________________________________________________________________________________________________________" + 
+                        "\n"+"OMDB Search Results for: " +artist +"\n" 
+                        + "Movie Title: " + mTitle +"\n"+ "Year Released: " + mYear+"\n"+"IMDB Rating: "+ mImdbRating
+                        +"\n"+"Rotten Tomatoes Score: "+ mRottenToms +"\n" +"Production Location: " + mProdCountry +"\n"
+                        + "Language(s): " + mLanguage + "\n" + "Plot: " + mPlot + "\n" + "Cast: " + mActors, function (err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            else {
+                                console.log("content added!")
+                            }
+                        });
+        }).catch(function (error) {
+            if (error.response) {
+                console.log("--------------DATA----------------");
+                console.log(error.response.data);
+            }
+        })
+};
+
+
+
+
+var doThis = function () {
+
+    var doThisCommand = "";
+    var doThisVariable = "";
+
+    fs.readFile("random.txt", "utf8", function (error, data) {
+        if (error) {
+
+            return console.log(error);
+
+        }
+        //console.log(data);
+        var dataArr = data.split(",");
+        doThisCommand = dataArr[0];
+        doThisVariable = dataArr[1];
+
+        switch (doThisCommand) {
+            case "concert-this":
+                bandsInTown(doThisVariable);
+                break;
+
+            case "spotify-this":
+                spotifyer(doThisVariable);
+                break;
+
+            case "movie-this":
+                getMovie(doThisVariable);
+                break;
+
+        };
+    });
+};
+
+
 
 switch (command) {
     case "concert-this":
         bandsInTown(artist);
         break;
-    
-  /*  case "spotify-this":
-        spotifyThis(artist);
-        break;*/
+
+    case "spotify-this":
+        spotifyer(artist);
+        break;
+
+    case "movie-this":
+        getMovie(artist);
+        break;
+
+    case "do-what-it-says":
+        doThis();
+        break;
 };
+
+//constructor function
+
+
+
 
 
 /*
