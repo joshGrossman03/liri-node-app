@@ -6,8 +6,8 @@ var keys = require("./keys.js");
 var spotify = new Spotify(keys.spotify);
 var axios = require("axios");
 var moment = require('moment');
-var command = process.argv[2];
-var artist = process.argv[3];
+var command = process.argv[2].toLowerCase();
+var artist = process.argv.slice(3).join(" ").toLowerCase();
 var fs = require("fs");
 
  
@@ -32,15 +32,31 @@ var bandsInTown = function (artist) {
                 );
                 console.log("Tour Date(s) search results for: " + artist);
             for (var i = 0; i < response.data.length; i++) {
-                
-                console.log("Venue: "+ response.data[i].venue.name);
-                console.log("Location: " + response.data[i].venue.city +", "+ response.data[i].venue.country);
+                var venue = response.data[i].venue.name;
+                var city = response.data[i].venue.city;
+                var country = response.data[i].venue.country;
+                console.log("Venue: "+ venue);
+                console.log("Location: " + city +", "+ country);
                 var eventTime = response.data[i].datetime;
+            
                 console.log("Time: "+ eventTime);
-                console.log(
-                    "---------------------"
-                        );
-
+                console.log(  "---------------------");
+                
+                        fs.appendFile("log.txt", "\n"+"_________________________________________________________________________________________________________"
+                        + "\n"+"Concert-This Search Results for: " +artist 
+                        +"\n" + "Venue: "+ venue 
+                        +"\n" + "Location: " + city + ", " + country
+                        +"\n"  + " Date: " + eventTime,
+                        
+                        
+                        function (err) {
+                               if (err) {
+                                   console.log(err);
+                               }
+                               else {
+                                   //console.log("content added!")
+                               }
+                       });
             }
         }
         })
